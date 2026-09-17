@@ -1,0 +1,20 @@
+name: Block .claude/ on main
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fail if PR touches .claude/
+        run: |
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q '^\.claude/'; then
+            echo "This PR modifies .claude/, which is not allowed on main."
+            git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^\.claude/'
+            exit 1
+          fi
